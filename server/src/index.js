@@ -51,22 +51,18 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-async function bootstrap() {
-  await connectDB(process.env.MONGODB_URI);
+// Connect to DB (Vercel serverless: runs on each cold start)
+connectDB(process.env.MONGODB_URI).catch((err) => {
+  console.error('Failed to connect to MongoDB', err);
+});
 
-  // Only run cron + initial fetch in local dev (Vercel uses its own cron)
-  if (process.env.NODE_ENV !== 'production') {
-    const { startNewsCron } = await import('./services/cronService.js');
-    startNewsCron();
-    fetchAndStoreNews().catch((e) => console.error('[bootstrap] initial news fetch', e));
-  }
-
+// Local dev only
+if (process.env.NODE_ENV !== 'production') {
+  import('./services/cronService.js').then(({ startNewsCron }) => startNewsCron());
+  fetchAndStoreNews().catch((e) => console.error('[bootstrap] initial news fetch', e));
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server listening on http://127.0.0.1:${PORT} (and your LAN IP)`);
+    console.log(`Server listening on http://127.0.0.1:${PORT}`);
   });
 }
 
-bootstrap().catch((err) => {
-  console.error('Failed to start server', err);
-  process.exit(1);
-});
+export default app;
