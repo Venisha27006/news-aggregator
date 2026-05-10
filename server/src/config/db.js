@@ -8,6 +8,9 @@ export async function connectDB(uri) {
     throw new Error('MONGODB_URI is not defined');
   }
   mongoose.set('strictQuery', true);
-  await mongoose.connect(uri);
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 10000,
+  });
   console.log('MongoDB connected');
 }
