@@ -12,12 +12,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // In development, reflect any origin so Vite on 5173/5174 or 127.0.0.1 still works with VITE_API_URL.
+const allowedOrigin = (process.env.CLIENT_URL || 'http://localhost:5173').trim().replace(/\/$/, '');
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.CLIENT_URL || 'http://localhost:5173'
-        : true,
+    origin: process.env.NODE_ENV === 'production' ? allowedOrigin : true,
     credentials: true,
   })
 );
